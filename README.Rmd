@@ -1,0 +1,31 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# plotellaneous 🎨📊
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+I put in `plotellaneous` my miscellaneous dataviz experiments 🖋🖍
+
+Plots are produced with R. I mainly use the `{ggplot2}` package and the packages that revolve around it (`{ggforce}`, `{cowplot}`, `{ggpubr}`, etc.). 
+
+```{r echo=FALSE, out.width="50%", fig.align='center'}
+knitr::include_graphics("plots/margotbrd_plot_sepal_wl.gif")
+```
+
+### Vintage `iris` dataviz 🌸🌸🌸
+
+```{r echo=FALSE, out.width="891px", out.height="630px"}
+knitr::include_graphics("plots/margotbrd_plot_sepal_wl.png")
+```
