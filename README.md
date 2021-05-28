@@ -7,11 +7,13 @@
 
 <!-- badges: end -->
 
-I put in plotellaneous my miscellaneous dataviz experiments.
+I put in `plotellaneous` my miscellaneous dataviz experiments 🖋🖍
 
 Plots are produced with R. I mainly use the `{ggplot2}` package and the
-packages that revolve around it (`{ggforce}`, `{cowplot}`, et`{ggpubr}`,
-c.).
+packages that revolve around it (`{ggforce}`, `{cowplot}`, `{ggpubr}`,
+etc.).
+
+<img src="plots/margotbrd_plot_sepal_wl.gif" width="50%" style="display: block; margin: auto;" />
 
 ### Vintage `iris` dataviz 🌸🌸🌸
 

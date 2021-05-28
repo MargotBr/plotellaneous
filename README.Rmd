@@ -16,9 +16,13 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-I put in plotellaneous my miscellaneous dataviz experiments. 
+I put in `plotellaneous` my miscellaneous dataviz experiments 🖋🖍
 
-Plots are produced with R. I mainly use the `{ggplot2}` package and the packages that revolve around it (`{ggforce}`, `{cowplot}`, et`{ggpubr}`, c.). 
+Plots are produced with R. I mainly use the `{ggplot2}` package and the packages that revolve around it (`{ggforce}`, `{cowplot}`, `{ggpubr}`, etc.). 
+
+```{r echo=FALSE, out.width="50%", fig.align='center'}
+knitr::include_graphics("plots/margotbrd_plot_sepal_wl.gif")
+```
 
 ### Vintage `iris` dataviz 🌸🌸🌸
 

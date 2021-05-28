@@ -27,7 +27,7 @@ This vignette presents the code to produce 3 vintage data visualizations built f
 - Relationship between length of sepals and length of petals
 
 ```{r}
-# Required fonts : 1942 report and Chorettan
+# Required fonts : 1942 report, Chorettan, Marker Mark
 # extrafont::font_import()
 ```
 
@@ -98,7 +98,8 @@ plot_sepal_wl <- plot_sepal_wl +
   labs(title = "Relationship between width and length\nof sepals for three varieties of iris",
        subtitle = "iris dataset 1936",
        x = "Sepal width", 
-       y = "Sepal length")
+       y = "Sepal length", 
+       caption = "Visualization by Margot Brard @github.com/MargotBr")
 
 # Change theme
 plot_sepal_wl <- plot_sepal_wl +
@@ -108,7 +109,8 @@ plot_sepal_wl <- plot_sepal_wl +
     axis.title = element_text(family = "Chorettan", size = 25),
     axis.text = element_text(family = "Chorettan", size = 10),
     plot.background = element_rect(fill = "#F2EFD5"),
-    panel.border = element_rect(fill = NA, color = "#D0C4A5", size = 1)
+    panel.border = element_rect(fill = NA, color = "#D0C4A5", size = 1),
+    plot.caption = element_text(family = "Marker Mark")
   )
 
 # Save plot as PDF and PNG 
