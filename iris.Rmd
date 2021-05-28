@@ -15,38 +15,34 @@ knitr::opts_chunk$set(warning = FALSE)
 library(ggplot2)
 library(magrittr)
 library(dplyr)
-library(magick)
 library(ggforce)
+library(ggpubr)
 library(cowplot)
 ```
 
 This vignette presents the code to produce 3 vintage data visualizations built from the `iris` dataset (1936): 
 
 - Relationship between width and length of sepals for three varieties of iris
-- 
-- 
+- Number of observations of each of the three varieties in the dataset
+- Relationship between length of sepals and length of petals
 
 ```{r}
-#extrafont::font_import()
-backgound_image <- png::readPNG("images/vintage_paper.png")
-
-data_image_iris <- tibble::tibble(
-  Species = iris %>% distinct(Species) %>% pull(),
-  image = c("images/iris_1.png", "images/iris_2.png", "images/iris_3.png")
-)
+# Required fonts : 1942 report and Chorettan
+# extrafont::font_import()
 ```
 
 ### Relationship between width and length of sepals for three varieties of iris
 
-```{r out.width="891px", out.height="630px"}
-# Construire le plot de base
+```{r echo=TRUE, out.width="891px", out.height="630px", results='hide'}
+# Build the basic plot with background image
 plot_sepal_wl <- iris %>% 
-  left_join(data_image_iris,
-            by = "Species") %>% 
   ggplot() +
-  ggpubr::background_image(backgound_image) + 
+  background_image(png::readPNG("images/vintage_paper.png")) + 
   aes(x = Sepal.Width, y = Sepal.Length) +
-  geom_point(alpha = 0.5, color = "#5E5E5E") + 
+  geom_point(alpha = 0.5, color = "#5E5E5E")
+
+# Add ellipses
+plot_sepal_wl <- plot_sepal_wl + 
   geom_mark_ellipse(aes(group = Species, label = Species), 
                     linetype = 3, 
                     color = "#5E5E5E", 
@@ -57,11 +53,8 @@ plot_sepal_wl <- iris %>%
                     con.linetype = 1, 
                     con.colour = "#5E5E5E")
   
-# Extraire la composition du plot
-plot_sepal_wl_build <- ggplot_build(plot_sepal_wl)
-
-# Trouver les centroïdes des ellipses
-data_centroid_min_max_ellipses <- plot_sepal_wl_build$data[[3]] %>% 
+# Find the centroids of the ellipses & add iris images
+data_centroid_ellipses_images <- ggplot_build(plot_sepal_wl)$data[[3]] %>% 
   as_tibble() %>%
   select(x, y, group) %>% 
   mutate(Species = case_when(
@@ -73,37 +66,41 @@ data_centroid_min_max_ellipses <- plot_sepal_wl_build$data[[3]] %>%
   summarise(centroid_x = mean(x), 
             centroid_y = mean(y),
             .groups = "drop") %>% 
-  left_join(data_image_iris,
-            by = "Species")
+  left_join(
+    tibble::tibble(
+      Species = iris %>% distinct(Species) %>% pull(),
+      image = c("images/iris_1.png", "images/iris_2.png", "images/iris_3.png")
+      ),
+    by = "Species")
 
-# Ajouter les images des iris dans les ellipses
+# Add iris images in ellipses
 plot_sepal_wl <- plot_sepal_wl +
-  draw_image(image = data_centroid_min_max_ellipses %>% slice(1) %>% select(image) %>% pull(), 
-             x = data_centroid_min_max_ellipses %>% slice(1) %>% select(centroid_x) %>% pull(), 
-             y = data_centroid_min_max_ellipses %>% slice(1) %>% select(centroid_y) %>% pull(), 
+  draw_image(image = data_centroid_ellipses_images %>% slice(1) %>% select(image) %>% pull(), 
+             x = data_centroid_ellipses_images %>% slice(1) %>% select(centroid_x) %>% pull(), 
+             y = data_centroid_ellipses_images %>% slice(1) %>% select(centroid_y) %>% pull(), 
              hjust = 0.5, vjust = 0.5, scale = 1.5) +
-  draw_image(image = data_centroid_min_max_ellipses %>% slice(2) %>% select(image) %>% pull(), 
-             x = data_centroid_min_max_ellipses %>% slice(2) %>% select(centroid_x) %>% pull(), 
-             y = data_centroid_min_max_ellipses %>% slice(2) %>% select(centroid_y) %>% pull(), 
+  draw_image(image = data_centroid_ellipses_images %>% slice(2) %>% select(image) %>% pull(), 
+             x = data_centroid_ellipses_images %>% slice(2) %>% select(centroid_x) %>% pull(), 
+             y = data_centroid_ellipses_images %>% slice(2) %>% select(centroid_y) %>% pull(), 
              hjust = 0.5, vjust = 0.5, scale = 1.5) +
-  draw_image(image = data_centroid_min_max_ellipses %>% slice(3) %>% select(image) %>% pull(), 
-             x = data_centroid_min_max_ellipses %>% slice(3) %>% select(centroid_x) %>% pull(), 
-             y = data_centroid_min_max_ellipses %>% slice(3) %>% select(centroid_y) %>% pull(), 
+  draw_image(image = data_centroid_ellipses_images %>% slice(3) %>% select(image) %>% pull(), 
+             x = data_centroid_ellipses_images %>% slice(3) %>% select(centroid_x) %>% pull(), 
+             y = data_centroid_ellipses_images %>% slice(3) %>% select(centroid_y) %>% pull(), 
              hjust = 0.5, vjust = 0.5, scale = 1.5) 
 
-# Limites
+# Increase the limits
 plot_sepal_wl <- plot_sepal_wl +
   scale_x_continuous(expand = c(0.1, 0.1)) +
   scale_y_continuous(expand = c(0.1, 1))
 
-# Titres
+# Change titles
 plot_sepal_wl <- plot_sepal_wl +
   labs(title = "Relationship between width and length\nof sepals for three varieties of iris",
        subtitle = "iris dataset 1936",
        x = "Sepal width", 
        y = "Sepal length")
 
-# Thème
+# Change theme
 plot_sepal_wl <- plot_sepal_wl +
   theme(
     plot.title = element_text(family = "1942 report", size = 22),
@@ -114,18 +111,28 @@ plot_sepal_wl <- plot_sepal_wl +
     panel.border = element_rect(fill = NA, color = "#D0C4A5", size = 1)
   )
 
-# Save
-ggsave(filename = "exports/plot_sepal_wl.pdf", 
+# Save plot as PDF and PNG 
+ggsave(filename = "plots/margotbrd_plot_sepal_wl.pdf", 
        plot = plot_sepal_wl, 
        device = cairo_pdf, 
        width = 297, 
        height = 210, 
        units = "mm")
 
-knitr::include_graphics("exports/plot_sepal_wl.pdf")
+png(filename = "plots/margotbrd_plot_sepal_wl.png",
+    width = 297, 
+    height = 210, 
+    units = "mm",
+    res = 400)
+print(plot_sepal_wl)
+dev.off()
 ```
 
-### Plot 2 
+```{r out.width="891px", out.height="630px"}
+knitr::include_graphics("plots/margotbrd_plot_sepal_wl.png")
+```
+
+### Number of observations of each of the three varieties in the dataset
 
 ```{r}
 iris %>% 
@@ -135,7 +142,7 @@ iris %>%
   geom_col()
 ```
 
-### Plot 3
+### Relationship between length of sepals and length of petals
 
 ```{r}
 iris %>% 

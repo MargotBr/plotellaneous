@@ -11,9 +11,17 @@ knitr::opts_chunk$set(
 )
 ```
 
-# plotellaneous
+# plotellaneous 🎨📊
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of plotellaneous is to centralize my dataviz developments.
+I put in plotellaneous my miscellaneous dataviz experiments. 
+
+Plots are produced with R. I mainly use the `{ggplot2}` package and the packages that revolve around it (`{ggforce}`, `{cowplot}`, et`{ggpubr}`, c.). 
+
+### Vintage `iris` dataviz 🌸🌸🌸
+
+```{r echo=FALSE, out.width="891px", out.height="630px"}
+knitr::include_graphics("plots/margotbrd_plot_sepal_wl.png")
+```
