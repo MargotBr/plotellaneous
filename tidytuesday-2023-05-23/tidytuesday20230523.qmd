@@ -8,15 +8,15 @@ editor: visual
 library(tidytuesdayR)
 library(stringr)
 library(dplyr)
-library(showtext)
+library(osmdata)
+library(sf)
 library(ggplot2)
 library(png)
+
+library(showtext)
 library(grid)
-library(patchwork)
 library(ggimage)
 library(magick)
-library(osmdata)
-library(ggmap)
 ```
 
 ## Data import
@@ -25,6 +25,7 @@ library(ggmap)
 #| message: false
 #| warning: false
 squirrels_data <- tt_load("2023-05-23")$squirrel_data
+
 colnames(squirrels_data) <- colnames(squirrels_data) %>% 
   str_to_lower() %>% 
   str_replace_all(pattern = " ", replacement = "_")
@@ -32,45 +33,59 @@ colnames(squirrels_data) <- colnames(squirrels_data) %>%
 
 ## Data viz
 
-### Fonts
+### Create a map of Central Park, NYC City
+
+Use the `{osmdata}` to extract and use data from OpenStreetMap (OSM).
+
+Two features are considered here:
+
+- water: basins and lakes in Central Park
+- highway: paths, footways, cycleways, etc.
 
 ```{r}
-font_add_google(
-  name = "Syne Mono", 
-  family = "Syne Mono"
-)
-showtext_auto()
-```
-
-### Plot
-
-#### Map
-
-```{r}
-central_park_bb <- getbb("Central Park")
-
-central_park_map <- get_map(central_park_bb, maptype = "roadmap")
+# available_tags("water") # available possibilities for the feature 'water'
+# str_c(available_tags("water"), collapse = "', '")
 
 central_park_boundary <- c(
-  left = min(squirrels_data$x),
-  bottom = min(squirrels_data$y),
-  right = max(squirrels_data$x),
-  top = max(squirrels_data$y)
+  left = min(squirrels_data$x) - 0.001,
+  bottom = min(squirrels_data$y) - 0.001,
+  right = max(squirrels_data$x) + 0.001,
+  top = max(squirrels_data$y) + 0.001
 )
 
-get_stamenmap(
-  bbox = c(left = -95.80204, bottom = 29.38048, right = -94.92313, top = 30.14344),
-  maptype = "toner-lite") %>% ggmap() 
+spatial_info_water <- opq(
+    bbox = central_park_boundary
+  ) %>%
+  add_osm_feature(key = "water",
+                  value = c("reservoir", "pond", "basin")) %>%
+  osmdata_sf()
 
-map_plot <- ggplot(data = squirrels_data) + 
-  aes(
-    x = x, 
-    y = y
+spatial_info_paths <- opq(
+    bbox = central_park_boundary
+  ) %>%
+  add_osm_feature(key = "highway",
+                  value = c(
+                    "primary", "secondary", "tertiary",
+                    "path", "footway", "cycleway")) %>%
+  osmdata_sf()
+```
+
+Plot these spatial infos with `{sf}` and `{ggplot2}`:
+
+```{r}
+map_central_park_plot <- ggplot() + 
+  geom_sf(
+    data = spatial_info_water$osm_polygons,
+    inherit.aes = FALSE,
+    fill = rgb(87, 127, 146, max = 255),
+    color = NA
   ) +
-  geom_point(
-    size = 2,
-    alpha = 0.2
-  ) + 
+  geom_sf(
+    data = spatial_info_paths$osm_lines,
+    inherit.aes = FALSE,
+    alpha = 0.1,
+    size = 0.1
+  ) +
   theme(
     panel.background = element_rect(fill = NA, color = NA),
     plot.background = element_rect(fill = NA, color = NA),
@@ -80,71 +95,107 @@ map_plot <- ggplot(data = squirrels_data) +
     axis.ticks = element_blank()
   )
 
-map_plot
+map_central_park_plot
 ```
 
-#### Squirrels
+### Add the location of squirrels in Central Park, NYC
 
 ```{r}
-img_squirrel_statue <- image_read(
-  path = "img/squirrel_statue_liberty.png"
+map_squirrels_plot <- map_central_park_plot +
+  geom_point(
+    data = squirrels_data,
+    mapping = aes(
+    x = x, 
+    y = y),
+    size = 2,
+    alpha = 0.2
   )
 
-squirrels_plot <- image_ggplot(image = img_squirrel_statue)  +
-  labs(subtitle = "Where are squirrels in\nCentral Park, NYC?") +
+map_squirrels_plot
+```
+
+### Add the image of a squirrel and the statue of liberty
+
+These images were extracted from Freepik, and combined.
+
+```{r}
+img_squirrel_statue <- readPNG(
+  file.path(here::here(), "tidytuesday-2023-05-23/img/squirrel_statue_liberty.png")
+  ) %>% 
+  as.raster()
+
+map_squirrels_image_plot <- map_squirrels_plot +
+  annotation_raster(
+    img_squirrel_statue, 
+    xmin = central_park_boundary[["right"]] - 0.01, 
+    xmax = central_park_boundary[["right"]] + 0.04,
+    ymin = central_park_boundary[["bottom"]] - 0.01, 
+    ymax = central_park_boundary[["top"]]) +
+  coord_sf(
+    xlim = c(central_park_boundary[["left"]],
+             central_park_boundary[["right"]] + 0.04)
+  )
+
+map_squirrels_image_plot
+```
+
+### Add a title and a caption with an original font
+
+Use the `{showtext}` package to register a font from Google font.
+
+```{r}
+font_add_google(
+  name = "Syne Mono", 
+  family = "Syne Mono"
+)
+showtext_auto()
+```
+
+Add it to the plot:
+
+```{r}
+map_squirrels_image_plot_title <- map_squirrels_image_plot +
+  labs(
+    title = "Squirrels are everywhere in\nCentral Park, NYC!",
+    caption = "Data: 2018 Central Park Squirrel Census | Graphic: Margot Brd\nData (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright"
+  ) +
   theme(
-    plot.subtitle = element_text(
+    plot.title = element_text(
       hjust = 0.5,
       family = "Syne Mono",
-      size = 16,
+      size = 30,
       margin = margin(
         t = 0,
         r = 0,
-        b = 0,
+        b = -30,
         l = 0
       )
     ),
-    plot.margin = margin(
-      t = 5.5, 
-      r = 35,
-      b = 5.5, 
-      l = 5.5),
-    panel.background = element_rect(fill = NA, color = NA),
-    plot.background = element_rect(fill = NA, color = NA)
-  )
+    plot.caption = element_text(
+      hjust = 1,
+      family = "Syne Mono", 
+      size = 10
+      ))
 
-squirrels_plot
+map_squirrels_image_plot_title
 ```
 
-#### Final
+### Add a vintage paper in the background
 
 ```{r}
-final_plot <- map_plot +
-  squirrels_plot +
-  plot_layout(design = "112") &
-  plot_annotation(
-    caption = "Data: 2018 Central Park Squirrel Census | Graphic: Margot Brd\nData (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright"
-  ) & 
-  theme(
-    panel.background = element_rect(fill = NA, color = NA),
-    plot.background = element_rect(fill = NA, color = NA), 
-    plot.caption = element_text(
-      hjust = 0,
-      family = "Syne Mono", 
-      size = 5
-      )
-  ) 
+img_vintage <- readPNG(
+  file.path(here::here(), "tidytuesday-2023-05-23/img/vintage_paper.png"),
+  native = TRUE
+)
 
-final_plot
+map_squirrels_image_plot_title
 
-img_vintage <- readPNG("img/vintage_paper.png", native = TRUE)
-
-# grid.draw(gList(
-#   rasterGrob(
-#     img_vintage,
-#     width = unit(1, "npc"),
-#     height = unit(1, "npc")
-#   ),
-#   patchworkGrob(final_plot)
-# ))
+grid.draw(gList(
+  rasterGrob(
+    img_vintage,
+    width = unit(1, "npc"),
+    height = unit(1, "npc")
+  ),
+  ggplotGrob(map_squirrels_image_plot_title)
+))
 ```
