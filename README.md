@@ -16,7 +16,7 @@ etc.).
 
 ### Squirrels location in Central Park, NYC 🐿️
 
-<img src="plots/margotbr_squirrels_nyc.png" width="891px" height="630px" />
+<img src="plots/margotbr_squirrels_nyc.png" width="630px" height="630px" />
 
 ### Vintage `iris` dataviz 🌸
 
