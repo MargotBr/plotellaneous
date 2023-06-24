@@ -18,14 +18,20 @@ knitr::opts_chunk$set(
 
 I put in `plotellaneous` my miscellaneous dataviz experiments 🖋🖍
 
-Plots are produced with R. I mainly use the `{ggplot2}` package and the packages that revolve around it (`{ggforce}`, `{cowplot}`, `{ggpubr}`, etc.). 
+Plots are produced with R. I mainly use the `{ggplot2}` package and the packages that revolve around it. 
 
 ```{r echo=FALSE, out.width="50%", fig.align='center'}
-knitr::include_graphics("plots/margotbrd_plot_sepal_wl.gif")
+knitr::include_graphics("plots/margotbr_plot_sepal_wl.gif")
 ```
 
-### Vintage `iris` dataviz 🌸🌸🌸
+### Squirrels location in Central Park, NYC 🐿️
+
+```{r echo=FALSE, out.width="891px", out.height="891px"}
+knitr::include_graphics("plots/margotbr_squirrels_nyc.png")
+```
+
+### Vintage `iris` dataviz 🌸
 
 ```{r echo=FALSE, out.width="891px", out.height="630px"}
-knitr::include_graphics("plots/margotbrd_plot_sepal_wl.png")
+knitr::include_graphics("plots/margotbr_plot_sepal_wl.png")
 ```

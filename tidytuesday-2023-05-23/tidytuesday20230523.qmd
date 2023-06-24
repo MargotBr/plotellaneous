@@ -12,10 +12,8 @@ library(osmdata)
 library(sf)
 library(ggplot2)
 library(png)
-
 library(showtext)
 library(grid)
-library(ggimage)
 library(magick)
 ```
 
@@ -42,10 +40,9 @@ Two features are considered here:
 - water: basins and lakes in Central Park
 - highway: paths, footways, cycleways, etc.
 
-```{r}
-# available_tags("water") # available possibilities for the feature 'water'
-# str_c(available_tags("water"), collapse = "', '")
+Available possibilities for a given feature can be found with `available_tags()` (e.g. `available_tags("water")`)
 
+```{r}
 central_park_boundary <- c(
   left = min(squirrels_data$x) - 0.001,
   bottom = min(squirrels_data$y) - 0.001,
@@ -70,7 +67,7 @@ spatial_info_paths <- opq(
   osmdata_sf()
 ```
 
-Plot these spatial infos with `{sf}` and `{ggplot2}`:
+Plot this spatial info with `{sf}` and `{ggplot2}`:
 
 ```{r}
 map_central_park_plot <- ggplot() + 
@@ -96,9 +93,16 @@ map_central_park_plot <- ggplot() +
   )
 
 map_central_park_plot
+
+ggsave(
+ filename = file.path(here::here(), "tidytuesday-2023-05-23/interplots/map_central_park_plot.png"),
+ plot = map_central_park_plot
+)
 ```
 
 ### Add the location of squirrels in Central Park, NYC
+
+Use the `X` and `Y`coordinates in the squirrels dataset.
 
 ```{r}
 map_squirrels_plot <- map_central_park_plot +
@@ -107,20 +111,28 @@ map_squirrels_plot <- map_central_park_plot +
     mapping = aes(
     x = x, 
     y = y),
-    size = 2,
-    alpha = 0.2
+    size = 1,
+    alpha = 0.2,
+    color = rgb(194, 142, 100, max = 255)
   )
 
 map_squirrels_plot
+
+ggsave(
+ filename = file.path(here::here(), "tidytuesday-2023-05-23/interplots/map_squirrels_plot.png"),
+ plot = map_squirrels_plot
+)
 ```
 
 ### Add the image of a squirrel and the statue of liberty
 
 These images were extracted from Freepik, and combined.
 
+The image is added to the plot with `annotation_raster()`.
+
 ```{r}
 img_squirrel_statue <- readPNG(
-  file.path(here::here(), "tidytuesday-2023-05-23/img/squirrel_statue_liberty.png")
+  file.path(here::here(), "tidytuesday-2023-05-23/img/squirrel_statue_liberty2.png")
   ) %>% 
   as.raster()
 
@@ -128,15 +140,16 @@ map_squirrels_image_plot <- map_squirrels_plot +
   annotation_raster(
     img_squirrel_statue, 
     xmin = central_park_boundary[["right"]] - 0.01, 
-    xmax = central_park_boundary[["right"]] + 0.04,
+    xmax = central_park_boundary[["right"]] + 0.01,
     ymin = central_park_boundary[["bottom"]] - 0.01, 
-    ymax = central_park_boundary[["top"]]) +
-  coord_sf(
-    xlim = c(central_park_boundary[["left"]],
-             central_park_boundary[["right"]] + 0.04)
-  )
+    ymax = central_park_boundary[["top"]] - 0.025) 
 
 map_squirrels_image_plot
+
+ggsave(
+ filename = file.path(here::here(), "tidytuesday-2023-05-23/interplots/map_squirrels_image_plot.png"),
+ plot = map_squirrels_image_plot
+)
 ```
 
 ### Add a title and a caption with an original font
@@ -151,19 +164,25 @@ font_add_google(
 showtext_auto()
 ```
 
-Add it to the plot:
+Add it to the plot (title, subtitle, caption):
 
 ```{r}
 map_squirrels_image_plot_title <- map_squirrels_image_plot +
   labs(
-    title = "Squirrels are everywhere in\nCentral Park, NYC!",
-    caption = "Data: 2018 Central Park Squirrel Census | Graphic: Margot Brd\nData (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright"
+    title = "Oh, look! Look! A squirrel!",
+    subtitle = "Location of squirrels in Central Park, NYC",
+    caption = "Data: 2018 Central Park Squirrel Census | Graphic: MargotBr\nData (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright"
   ) +
   theme(
     plot.title = element_text(
       hjust = 0.5,
       family = "Syne Mono",
-      size = 30,
+      size = 30
+    ),
+    plot.subtitle = element_text(
+      hjust = 0.5,
+      family = "Syne Mono",
+      size = 15,
       margin = margin(
         t = 0,
         r = 0,
@@ -174,17 +193,24 @@ map_squirrels_image_plot_title <- map_squirrels_image_plot +
     plot.caption = element_text(
       hjust = 1,
       family = "Syne Mono", 
-      size = 10
+      size = 10, 
+      lineheight = 0.5,
+      margin = margin(
+        t = 20,
+        r = 0,
+        b = 0,
+        l = 0
+      )
       ))
 
 map_squirrels_image_plot_title
 ```
 
-### Add a vintage paper in the background
+### Add a paper in the background
 
 ```{r}
-img_vintage <- readPNG(
-  file.path(here::here(), "tidytuesday-2023-05-23/img/vintage_paper.png"),
+img_paper <- readPNG(
+  file.path(here::here(), "tidytuesday-2023-05-23/img/paper.png"),
   native = TRUE
 )
 
@@ -192,10 +218,65 @@ map_squirrels_image_plot_title
 
 grid.draw(gList(
   rasterGrob(
-    img_vintage,
+    img_paper,
     width = unit(1, "npc"),
     height = unit(1, "npc")
   ),
   ggplotGrob(map_squirrels_image_plot_title)
 ))
 ```
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| include: false
+
+# Save the plot
+
+map_squirrels_image_plot_size_font <- map_squirrels_image_plot_title + 
+  theme(
+    plot.title = element_text(
+      size = 100
+    ), 
+    plot.subtitle = element_text(
+      size = 60
+    ), 
+    plot.caption = element_text(
+      size = 20
+    )
+  )
+
+ggsave(
+  filename = file.path(
+    here::here(),
+    "tidytuesday-2023-05-23/interplots/map_squirrels_image_plot_title.png"
+  ),
+  plot = map_squirrels_image_plot_size_font,
+  width = 210,
+  height = 210,
+  units = "mm"
+)
+
+png(
+  filename = file.path(here::here(), "plots/margotbr_squirrels_nyc.png"),
+  width = 210, 
+  height = 210, 
+  units = "mm",
+  res = 400
+)
+
+map_squirrels_image_plot_size_font
+
+grid.draw(gList(
+  rasterGrob(
+    img_paper,
+    width = unit(1, "npc"),
+    height = unit(1, "npc")
+  ),
+  ggplotGrob(map_squirrels_image_plot_size_font)
+))
+
+dev.off()
+```
+

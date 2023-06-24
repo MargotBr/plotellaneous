@@ -4,17 +4,19 @@
 # plotellaneous 🎨📊
 
 <!-- badges: start -->
-
 <!-- badges: end -->
 
 I put in `plotellaneous` my miscellaneous dataviz experiments 🖋🖍
 
 Plots are produced with R. I mainly use the `{ggplot2}` package and the
-packages that revolve around it (`{ggforce}`, `{cowplot}`, `{ggpubr}`,
-etc.).
+packages that revolve around it.
 
-<img src="plots/margotbrd_plot_sepal_wl.gif" width="50%" style="display: block; margin: auto;" />
+<img src="plots/margotbr_plot_sepal_wl.gif" width="50%" style="display: block; margin: auto;" />
 
-### Vintage `iris` dataviz 🌸🌸🌸
+### Squirrels location in Central Park, NYC 🐿️
 
-<img src="plots/margotbrd_plot_sepal_wl.png" width="891px" height="630px" />
+<img src="plots/margotbr_squirrels_nyc.png" width="891px" height="891px" />
+
+### Vintage `iris` dataviz 🌸
+
+<img src="plots/margotbr_plot_sepal_wl.png" width="891px" height="630px" />
