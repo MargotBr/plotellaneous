@@ -84,8 +84,8 @@ map_central_park_plot <- ggplot() +
     size = 0.1
   ) +
   theme(
-    panel.background = element_rect(fill = NA, color = NA),
-    plot.background = element_rect(fill = NA, color = NA),
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.background = element_rect(fill = "white", color = NA),
     panel.grid = element_blank(), 
     axis.title = element_blank(), 
     axis.text = element_blank(), 
@@ -96,7 +96,10 @@ map_central_park_plot
 
 ggsave(
  filename = file.path(here::here(), "tidytuesday-2023-05-23/interplots/map_central_park_plot.png"),
- plot = map_central_park_plot
+ plot = map_central_park_plot,
+ width = 210,
+ height = 210,
+ units = "mm"
 )
 ```
 
@@ -120,7 +123,10 @@ map_squirrels_plot
 
 ggsave(
  filename = file.path(here::here(), "tidytuesday-2023-05-23/interplots/map_squirrels_plot.png"),
- plot = map_squirrels_plot
+ plot = map_squirrels_plot,
+ width = 210,
+ height = 210,
+ units = "mm"
 )
 ```
 
@@ -148,7 +154,10 @@ map_squirrels_image_plot
 
 ggsave(
  filename = file.path(here::here(), "tidytuesday-2023-05-23/interplots/map_squirrels_image_plot.png"),
- plot = map_squirrels_image_plot
+ plot = map_squirrels_image_plot,
+ width = 210,
+ height = 210,
+ units = "mm"
 )
 ```
 
@@ -204,35 +213,6 @@ map_squirrels_image_plot_title <- map_squirrels_image_plot +
       ))
 
 map_squirrels_image_plot_title
-```
-
-### Add a paper in the background
-
-```{r}
-img_paper <- readPNG(
-  file.path(here::here(), "tidytuesday-2023-05-23/img/paper.png"),
-  native = TRUE
-)
-
-map_squirrels_image_plot_title
-
-grid.draw(gList(
-  rasterGrob(
-    img_paper,
-    width = unit(1, "npc"),
-    height = unit(1, "npc")
-  ),
-  ggplotGrob(map_squirrels_image_plot_title)
-))
-```
-
-```{r}
-#| echo: false
-#| warning: false
-#| message: false
-#| include: false
-
-# Save the plot
 
 map_squirrels_image_plot_size_font <- map_squirrels_image_plot_title + 
   theme(
@@ -257,6 +237,55 @@ ggsave(
   height = 210,
   units = "mm"
 )
+```
+
+### Add a paper in the background
+
+```{r}
+img_paper <- readPNG(
+  file.path(here::here(), "tidytuesday-2023-05-23/img/paper.png"),
+  native = TRUE
+)
+
+map_squirrels_image_plot_no_back <- map_squirrels_image_plot_title +
+  theme(
+    panel.background = element_rect(fill = NA, color = NA),
+    plot.background = element_rect(fill = NA, color = NA)
+  )
+
+map_squirrels_image_plot_no_back
+
+grid.draw(gList(
+  rasterGrob(
+    img_paper,
+    width = unit(1, "npc"),
+    height = unit(1, "npc")
+  ),
+  ggplotGrob(map_squirrels_image_plot_no_back)
+))
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| include: false
+
+# Save the plot
+map_squirrels_image_plot_no_back <- map_squirrels_image_plot_size_font + 
+  theme(
+    panel.background = element_rect(fill = NA, color = NA),
+    plot.background = element_rect(fill = NA, color = NA),
+    plot.title = element_text(
+      size = 100
+    ), 
+    plot.subtitle = element_text(
+      size = 60
+    ), 
+    plot.caption = element_text(
+      size = 20
+    )
+  )
 
 png(
   filename = file.path(here::here(), "plots/margotbr_squirrels_nyc.png"),
@@ -266,7 +295,7 @@ png(
   res = 400
 )
 
-map_squirrels_image_plot_size_font
+map_squirrels_image_plot_no_back
 
 grid.draw(gList(
   rasterGrob(
@@ -274,7 +303,7 @@ grid.draw(gList(
     width = unit(1, "npc"),
     height = unit(1, "npc")
   ),
-  ggplotGrob(map_squirrels_image_plot_size_font)
+  ggplotGrob(map_squirrels_image_plot_no_back)
 ))
 
 dev.off()
