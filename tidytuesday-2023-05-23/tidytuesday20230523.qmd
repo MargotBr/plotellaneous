@@ -72,12 +72,6 @@ Plot this spatial info with `{sf}` and `{ggplot2}`:
 ```{r}
 map_central_park_plot <- ggplot() + 
   geom_sf(
-    data = spatial_info_water$osm_polygons,
-    inherit.aes = FALSE,
-    fill = rgb(87, 127, 146, max = 255),
-    color = NA
-  ) +
-  geom_sf(
     data = spatial_info_paths$osm_lines,
     inherit.aes = FALSE,
     alpha = 0.1,
@@ -92,15 +86,31 @@ map_central_park_plot <- ggplot() +
     axis.ticks = element_blank()
   )
 
-map_central_park_plot
-
 ggsave(
- filename = file.path(here::here(), "tidytuesday-2023-05-23/interplots/map_central_park_plot.png"),
+ filename = file.path(here::here(), "tidytuesday-2023-05-23/interplots/map_central_park_plot_line.png"),
  plot = map_central_park_plot,
  width = 210,
  height = 210,
  units = "mm"
 )
+
+map_central_park_plot <- map_central_park_plot +
+  geom_sf(
+    data = spatial_info_water$osm_polygons,
+    inherit.aes = FALSE,
+    fill = rgb(87, 127, 146, max = 255),
+    color = NA
+  )
+  
+ggsave(
+ filename = file.path(here::here(), "tidytuesday-2023-05-23/interplots/map_central_park_plot_polygon.png"),
+ plot = map_central_park_plot,
+ width = 210,
+ height = 210,
+ units = "mm"
+)
+
+map_central_park_plot
 ```
 
 ### Add the location of squirrels in Central Park, NYC
